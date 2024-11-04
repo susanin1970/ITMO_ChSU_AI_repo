@@ -1,0 +1,25 @@
+# python
+from enum import Enum
+
+# 3rdparty
+from pydantic import BaseModel, Field
+
+
+class GlaucomaSignsStatus(Enum):
+    """Перечисление, описывающее возможные классы изображений глазного дна в зависимости от наличия или отсутствия признаков глаукомы"""
+
+    GLAUCOMA = "есть признаки глаукомы"
+    NO_GLAUCOMA = "нет признаков глаукомы"
+
+
+class NeuralNetsServiceOutput(BaseModel):
+    """Датакласс, описывающий выход нейросетевого сервиса"""
+
+    predicted_class: str = Field(
+        default=GlaucomaSignsStatus.NO_GLAUCOMA,
+    )
+    """Значение предсказанного классификатором класса в зависимости от наличия/отсутствия признаков глаукомы """
+    cdr_value: float = Field(default=0.0)
+    """Значение CDR"""
+    rdar_calue: float = Field(default=0.0)
+    """Значение RDAR"""
