@@ -1,8 +1,18 @@
 # python
+from datetime import datetime
 from enum import Enum
 
 # 3rdparty
 from pydantic import BaseModel, Field
+
+
+class HealthCheck(BaseModel):
+    """Датакласс для описания статуса работы нейросетевого сервиса"""
+
+    status_code: int
+    """Код статуса работы нейросетевого сервиса"""
+    datetime: datetime
+    """Отсечка даты и времени"""
 
 
 class GlaucomaSignsStatus(Enum):

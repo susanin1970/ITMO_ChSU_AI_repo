@@ -39,14 +39,14 @@ class EfficientNet_ONNX:
         self.efficientnet_input_channels = self.classifier.get_inputs()[0].shape[1]
         self.efficientnet_input_name = self.classifier.get_inputs()[0].name
 
-    def classify(self, image: npt.NDArray[Any]) -> tuple[Any, float]:
+    def classify(self, image: npt.NDArray[Any]) -> tuple[Any, float, float]:
         """Метод для выполнения классификатора EfficientNet на изображении
 
         Параметры:
             * `image` (`npt.NDArray[Any])`: объект изображения
 
         Возвращает:
-            * `tuple[Any, float]`: кортеж с индексом класса изображения и временем выполнения
+            * `tuple[Any, float, float]`: кортеж с индексом класса изображения и временем выполнения
         """
         image_array = efficientnet_preprocessing(
             image, (self.efficientnet_input_width, self.efficientnet_input_height)
@@ -58,4 +58,5 @@ class EfficientNet_ONNX:
         end_time = time.perf_counter()
         inference_time_ms = round((end_time - start_time) * 1000, 3)
         class_id = efficientnet_outputs[0].argmax()
-        return class_id, inference_time_ms
+        confidence = efficientnet_outputs[0].max()
+        return class_id, confidence, inference_time_ms
