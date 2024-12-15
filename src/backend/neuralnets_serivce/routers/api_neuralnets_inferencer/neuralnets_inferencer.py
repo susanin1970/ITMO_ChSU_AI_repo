@@ -100,5 +100,6 @@ class NeuralNetsInferencer:
         logger.info(f"Время инференса классификатора: {classifier_inference_time}")
 
         neuralnets_service_output.predicted_class = image_class
+        neuralnets_service_output.predicted_class_confidence = float(confidence)
 
         return neuralnets_service_output
