@@ -33,7 +33,7 @@ if sys.platform.startswith("win"):
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 app = FastAPI(
-    title="Pipe Neural Nets Inference Service API",
+    title="Glaucoma Detection Neural Nets Inference Service API",
     version="0.1.0",
     description="",
     docs_url=None,

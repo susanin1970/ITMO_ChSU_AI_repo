@@ -11,6 +11,7 @@ import uvicorn
 from src.backend.neuralnets_serivce.schemas.service_config import (
     NeuralNetsServiceConfig,
 )
+from src.backend.neuralnets_serivce.tools.service_tools import Server
 
 
 def get_service(
@@ -26,7 +27,7 @@ def get_service(
         * `reload` (`bool`, `optional`): перезагружать ли сервис
     """
     config = uvicorn.Config(
-        "src.app:app",
+        "src.backend.neuralnets_serivce.app:app",
         host=service_config.common_settings.host,
         port=service_config.common_settings.port,
         log_level=logging.INFO,
@@ -34,7 +35,7 @@ def get_service(
         reload=reload,
         use_colors=False,
     )
-    return config
+    return Server(config)
 
 
 def main() -> None:
@@ -53,8 +54,7 @@ def main() -> None:
     async_logger.propagate = False
     async_logger.handlers.clear()
 
-    uvicorn_config = get_service(service_config_python)
-    uvicorn.run(uvicorn_config)
+    get_service(service_config_python).run()
 
 
 if __name__ == "__main__":

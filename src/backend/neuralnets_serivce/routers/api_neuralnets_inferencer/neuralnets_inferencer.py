@@ -54,7 +54,7 @@ class NeuralNetsInferencer:
 
         classifier_name = self._service_config_python.classification_config.name
         match classifier_name:
-            case "EfficientNet":
+            case "EfficientNet-B0":
                 self._classifier = EfficientNet_ONNX(
                     self._service_config_python.classification_config.path_to_weights,
                     self._service_config_python.classification_config.use_cuda,

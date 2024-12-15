@@ -19,7 +19,7 @@ from src.backend.neuralnets_serivce.tools.logging_tools import get_logger
 
 service_config_path = "src/backend/neuralnets_serivce/configs/service_config.json"
 
-router = APIRouter(tags=["Pipes Neural Nets Inferencer"], prefix="")
+router = APIRouter(tags=["Glaucoma Detection Neural Nets Inferencer"], prefix="")
 logger = get_logger()
 inferencer = NeuralNetsInferencer(service_config_path)
 

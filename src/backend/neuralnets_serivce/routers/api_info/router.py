@@ -6,7 +6,7 @@ from fastapi import APIRouter, status
 
 # project
 from src.backend.neuralnets_serivce.schemas.service_output import HealthCheck
-from src.backend.neuralnets_serivce.tools.logging_tools import get_logger()
+from src.backend.neuralnets_serivce.tools.logging_tools import get_logger
 
 logger = get_logger()
 router = APIRouter(tags=["Info"])
