@@ -45,5 +45,6 @@ async def inference(
     image_array: npt.NDArray[Any] = np.array(  # type: ignore
         Image.open(io.BytesIO(image_content))
     )
+    image_array = image_array[200:1750, 750:2300]
     neuralnets_service_output = inferencer.inference(image_array)
     return neuralnets_service_output

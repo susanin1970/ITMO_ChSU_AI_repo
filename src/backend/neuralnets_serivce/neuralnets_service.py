@@ -53,7 +53,8 @@ def main() -> None:
     async_logger.propagate = False
     async_logger.handlers.clear()
 
-    get_service(service_config_python).run()
+    uvicorn_config = get_service(service_config_python)
+    uvicorn.run(uvicorn_config)
 
 
 if __name__ == "__main__":
