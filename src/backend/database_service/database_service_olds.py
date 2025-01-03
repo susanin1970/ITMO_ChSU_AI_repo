@@ -10,11 +10,14 @@ from sqlalchemy import Column, Integer, String, TIMESTAMP, Boolean
 
 from sqlalchemy.orm import sessionmaker
 
+# Бустрапер
+
 print("initial app")
 
 Base = declarative_base()
 # model
 
+# Дата класс для добавления данных в БД
 class GlaucomaPydantic(BaseModel):
     id : int = None
     timestamps : int
