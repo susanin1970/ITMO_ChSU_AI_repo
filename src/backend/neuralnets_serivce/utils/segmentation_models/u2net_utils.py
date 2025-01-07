@@ -6,6 +6,7 @@ from typing import Dict, List
 import cv2
 import numpy as np
 import numpy.typing as npt
+from scipy.spatial.distance import pdist
 
 COLOR_MAP_DICT = {
     0: [0, 0, 0],
@@ -29,6 +30,24 @@ class OpticCupMaskBorderValuesOfPixels(Enum):
 
     LOWER_VALUE = 66
     UPPER_VALUE = 66
+
+
+def calc_max_mask_diameter(mask_image: npt.NDArray) -> float:
+    """Функция для вычисления максимального диаметра маски оптического диска/глазного бокала
+
+    Параметры:
+        * `mask_image` (`npt.NDArray`): изображение с маской оптического диска/глазного бокала
+
+    Возвращает:
+        * `float`: значение максимального диаметра маски оптического диска/глазного бокала
+    """
+    contours, _ = cv2.findContours(mask_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    mask_contour = contours[0]
+    points_of_mask = mask_contour.reshape(-1, 2)
+    diameters_list = pdist(points_of_mask)
+    max_diameter = np.max(diameters_list)
+
+    return max_diameter
 
 
 def remap_image(
