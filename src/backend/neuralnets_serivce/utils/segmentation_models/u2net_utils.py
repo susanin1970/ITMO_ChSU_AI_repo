@@ -13,6 +13,9 @@ COLOR_MAP_DICT = {
     2: [59, 26, 224],
 }
 
+MEAN = np.array([0.5, 0.5, 0.5])
+STD = np.array([0.5, 0.5, 0.5])
+
 
 class OpticDiscMaskBorderValuesOfPixels(Enum):
     """Перечисление граничных значений пикселей изображения с масками, полученными с помощью U2Net, для извлечения маски оптического диска"""
@@ -48,7 +51,8 @@ def remap_image(
 
     return new_image
 
-def u2net_preprocessing(image: npt.NDArray[np.float32], mean: npt.NDArray[np.float32], std) -> npt.NDArray[np.float32]:
+
+def u2net_preprocessing(image: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
     """Функция для выполнения препроцессинга U2Net
 
     Параметры :
@@ -57,9 +61,11 @@ def u2net_preprocessing(image: npt.NDArray[np.float32], mean: npt.NDArray[np.flo
     Возвращает:
         * `npt.NDArray[Any]:` предобработанное изображение для подачи в сегментационную модель U2Net
     """
-image_array = cv2.cvtColor(image_array, cv2.COLOR_BGR2RGB)
+    image_array = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     image_array = image_array / 255.0
-    image_array = (image_array - mean) / std
+    image_array = (image_array - MEAN) / STD
     image_array = np.expand_dims(image_array, axis=(0))
     image_array = np.transpose(image_array, (0, 3, 1, 2))
     image_array = image_array.astype(np.float32)
+
+    return image_array
