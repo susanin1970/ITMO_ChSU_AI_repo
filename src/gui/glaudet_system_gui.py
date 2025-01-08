@@ -33,6 +33,9 @@ class GlaucomaDetectionApp(QMainWindow):
 
         self.setWindowTitle("Glaudet")
         self.setGeometry(100, 100, 1280, 720)
+        self.setWindowFlags(
+            self.windowFlags() & ~Qt.WindowType.WindowMaximizeButtonHint
+        )
 
         self.image_path = None
         self.processing_results = None  # Путь к выбранному изображению
