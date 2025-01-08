@@ -5,6 +5,12 @@
         "path_to_weights": "src\\weights\\classification\\onnx\\efficientnetb0_best_checkpoint_crop.onnx",
         "use_cuda": true
     },
+    "segmentation_config": {
+        "name": "U2Net",
+        "path_to_weights": "src\\weights\\segmentation\\onnx\\u2net_best_checkpoint_crop_optic_disc.onnx",
+        "use_cuda": true
+
+    },
     "common_settings": {
         "host": "localhost",
         "port": 8000
