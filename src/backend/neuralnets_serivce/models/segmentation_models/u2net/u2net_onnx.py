@@ -69,23 +69,25 @@ class U2Net_ONNX:
 
         mask_for_optic_disc = cv2.inRange(
             first_output_color_mapped_gray,
-            OpticDiscMaskBorderValuesOfPixels.UPPER_VALUE,
-            OpticDiscMaskBorderValuesOfPixels.LOWER_VALUE,
+            OpticDiscMaskBorderValuesOfPixels.LOWER_VALUE.value,
+            OpticDiscMaskBorderValuesOfPixels.UPPER_VALUE.value,
         )
         mask_for_optic_cup = cv2.inRange(
             first_output_color_mapped_gray,
-            OpticCupMaskBorderValuesOfPixels.UPPER_VALUE,
-            OpticCupMaskBorderValuesOfPixels.LOWER_VALUE,
+            OpticCupMaskBorderValuesOfPixels.LOWER_VALUE.value,
+            OpticCupMaskBorderValuesOfPixels.UPPER_VALUE.value,
         )
 
         optic_disc_area = np.sum(mask_for_optic_disc > 0)
         optic_cup_area = np.sum(mask_for_optic_cup > 0)
 
-        rdar_value = optic_cup_area / optic_disc_area
+        rdar_value = round(optic_cup_area / optic_disc_area, 3)
 
         max_diameter_of_optic_disc_mask = calc_max_mask_diameter(mask_for_optic_disc)
         max_diameter_of_optic_cup_mask = calc_max_mask_diameter(mask_for_optic_cup)
 
-        cdr_value = max_diameter_of_optic_cup_mask / max_diameter_of_optic_disc_mask
+        cdr_value = round(
+            max_diameter_of_optic_cup_mask / max_diameter_of_optic_disc_mask, 3
+        )
 
         return cdr_value, rdar_value, inference_time_ms

@@ -80,8 +80,7 @@ def u2net_preprocessing(image: npt.NDArray[np.float32]) -> npt.NDArray[np.float3
     Возвращает:
         * `npt.NDArray[Any]:` предобработанное изображение для подачи в сегментационную модель U2Net
     """
-    image_array = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    image_array = image_array / 255.0
+    image_array = image / 255.0
     image_array = (image_array - MEAN) / STD
     image_array = np.expand_dims(image_array, axis=(0))
     image_array = np.transpose(image_array, (0, 3, 1, 2))
