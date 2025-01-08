@@ -1,24 +1,25 @@
+# python
+import sys
+
 # 3rdparty
+import requests
 from pydantic import TypeAdapter
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import (
     QApplication,
-    QMainWindow,
-    QLabel,
-    QVBoxLayout,
-    QHBoxLayout,
-    QPushButton,
-    QWidget,
-    QTabWidget,
-    QLineEdit,
     QFileDialog,
-    QTableWidget,
-    QTableWidgetItem,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
     QMessageBox,
+    QPushButton,
+    QTableWidget,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
 )
-from PyQt6.QtGui import QPixmap
-import requests
-import sys
 
 # project
 from src.backend.neuralnets_serivce.schemas.service_output import (
@@ -71,12 +72,14 @@ class GlaucomaDetectionApp(QMainWindow):
         self.buttons_layout.setSpacing(10)  # Отступы между кнопками
 
         self.open_image_button = QPushButton("Открыть изображение")
-        self.open_image_button.setFixedSize(800, 40)  # Увеличен размер кнопок
+        self.open_image_button.adjustSize()  # Увеличен размер кнопок
+        self.open_image_button.setFixedHeight(40)
         self.open_image_button.clicked.connect(self.open_image)
         self.buttons_layout.addWidget(self.open_image_button)
 
         self.process_image_button = QPushButton("Обработать изображение")
-        self.process_image_button.setFixedSize(800, 40)  # Увеличен размер кнопок
+        self.process_image_button.adjustSize()  # Увеличен размер кнопок
+        self.process_image_button.setFixedHeight(40)
         self.process_image_button.clicked.connect(self.process_image)
         self.buttons_layout.addWidget(self.process_image_button)
 
@@ -238,8 +241,8 @@ class GlaucomaDetectionApp(QMainWindow):
 
         self.diagnosis_label.setText(
             f"Признаки глаукомы: {self.image_class_value} с вероятностью {round(self.image_class_confidence, 3) * 100}%\n"
-            f"Значение CDR: - {self.cdr_value}\n"
-            f"Значение RDAR: - {self.rdar_value}\n"
+            f"Значение CDR: {self.cdr_value}\n"
+            f"Значение RDAR: {self.rdar_value}\n"
             f"Диагноз верифицирован: - {self.verificate_diagnosis}"
         )
 
