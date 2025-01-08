@@ -1,5 +1,6 @@
 # python
 import json
+import logging
 from datetime import datetime
 
 # 3rdparty
@@ -129,5 +130,7 @@ class NeuralNetsInferencer:
 
         neuralnets_service_output.predicted_class = image_class
         neuralnets_service_output.predicted_class_confidence = float(confidence)
+        neuralnets_service_output.cdr_value = cdr_value
+        neuralnets_service_output.rdar_value = rdar_value
 
         return neuralnets_service_output
