@@ -1,0 +1,6 @@
+{
+    "common_settings": {
+        "host": "localhost",
+        "port": 8080
+    }
+}
