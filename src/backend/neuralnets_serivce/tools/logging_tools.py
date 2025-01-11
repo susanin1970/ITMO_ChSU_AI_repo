@@ -51,9 +51,14 @@ def configure_service_logger(level: LogLevelTypes) -> None:
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
-    uvicorn_logger.addHandler(console_handler)
 
     logger.setLevel(level)
 
-    # uvicorn_acess_logger = logging.getLogger("uvicorn.access")
-    # uvicorn_error_logger = logging.getLogger("uvicorn.error")
+    uvicorn_acess_logger = logging.getLogger("uvicorn.access")
+    uvicorn_acess_logger.handlers.clear()
+
+    uvicorn_error_logger = logging.getLogger("uvicorn.error")
+    uvicorn_error_logger.handlers.clear()
+
+    uvicorn_acess_logger.addHandler(console_handler)
+    uvicorn_error_logger.addHandler(console_handler)
