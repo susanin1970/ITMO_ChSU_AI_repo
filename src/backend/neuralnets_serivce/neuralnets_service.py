@@ -11,6 +11,7 @@ import uvicorn
 from src.backend.neuralnets_serivce.schemas.service_config import (
     NeuralNetsServiceConfig,
 )
+from src.backend.neuralnets_serivce.tools.logging_tools import configure_service_logger
 from src.backend.neuralnets_serivce.tools.service_tools import Server
 
 
@@ -35,6 +36,7 @@ def get_service(
         reload=reload,
         use_colors=False,
     )
+    configure_service_logger(logging.INFO)
     return Server(config)
 
 
