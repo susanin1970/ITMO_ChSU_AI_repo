@@ -146,7 +146,7 @@ class GlaucomaDetectionApp(QMainWindow):
         self.tabs.addTab(self.log_tab, "Журнал событий")
 
         self.log_layout = QVBoxLayout()
-        self.log_table = QTableWidget(0, 6)  # 6 столбцов
+        self.log_table = QTableWidget(0, 8)  # 6 столбцов
         self.log_table.setHorizontalHeaderLabels(
             [
                 "ID изображения",
@@ -155,10 +155,12 @@ class GlaucomaDetectionApp(QMainWindow):
                 "Высота\nизображения",
                 "Класс наличия\nглаукомы",
                 "Верификация\nдиагноза",
+                "Значение CDR",
+                "Значение RDAR",
             ]
         )
         self.log_table.horizontalHeader().setStretchLastSection(True)
-        self.log_table.horizontalHeader().setDefaultSectionSize(200)
+        self.log_table.horizontalHeader().setDefaultSectionSize(170)
         self.log_table.setStyleSheet("border: 1px solid black;")
         self.log_layout.addWidget(self.log_table)
 

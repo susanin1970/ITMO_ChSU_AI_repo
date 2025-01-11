@@ -55,7 +55,7 @@ class U2Net_ONNX:
         start_time = time.perf_counter() * 1000
         outputs = self.u2net_session.run(None, {self.u2net_input_name: image_array})
         end_time = time.perf_counter() * 1000
-        inference_time_ms = round((end_time - start_time) * 1000, 3)
+        inference_time_ms = round(end_time - start_time, 3)
 
         # в первом выходе содержатся искомые маски объектов
         first_output = np.squeeze(outputs[0], axis=(0)).astype(np.uint8)

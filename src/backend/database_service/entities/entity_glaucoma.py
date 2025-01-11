@@ -1,18 +1,21 @@
 # 3rdparty
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, TIMESTAMP, Boolean
+from sqlalchemy import Column, Integer, Float, String, TIMESTAMP, Boolean
 
 Base = declarative_base()
+
 
 class Glaucoma(Base):
     """
     Сущность из sqlalchemy, описывающий результат анализа на глаукому в БД
     """
-    __tablename__ = 'glaucoma'
+
+    __tablename__ = "glaucoma"
     id = Column(Integer, primary_key=True)
     timestamps = Column(Integer)
     width = Column(Integer)
     height = Column(Integer)
     status = Column(Boolean)
     verify = Column(Boolean)
-    imgCache = Column(String)
+    cdr_value = Column(Float)
+    rdar_value = Column(Float)
