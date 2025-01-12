@@ -8,7 +8,7 @@ from fastapi import APIRouter, status
 from src.backend.neuralnets_serivce.schemas.service_output import HealthCheck
 from src.backend.neuralnets_serivce.tools.logging_tools import get_logger
 
-from src.backend.database_service.database.database_core import database_sqllite
+from src.backend.database_service.database.database_core import GlaucomaSQLiteDatabase
 from src.backend.database_service.entities.entity_glaucoma import GlaucomaEntity
 from src.backend.database_service.schemas.database_service_schemas import (
     GlaucomaPydantic,
@@ -17,10 +17,10 @@ from src.backend.database_service.schemas.database_service_schemas import Filter
 
 logger = get_logger()
 router = APIRouter(tags=["Info"])
-sessions = database_sqllite()
+sessions = GlaucomaSQLiteDatabase()
 
 
-@router.put("/database/")
+@router.put("/database")
 def update_processing_result_data_to_bd(imageId: int):
     session = sessions.get_session()
 
@@ -105,25 +105,25 @@ def delete_processing_result_data_from_db(imageId: int):
     session.commit()
 
 
-@router.post("/database/")
+@router.post("/database")
 def add_processing_result_data_to_db(record: GlaucomaPydantic):
-    try:
-        glaucoma = GlaucomaEntity(
-            timestamp=record.timestamp,
-            width=record.width,
-            height=record.height,
-            status=record.status,
-            verify=record.verify,
-            cdr_value=record.cdr_value,
-            rdar_value=record.rdar_value,
-        )
+    # try:
+    session = sessions.get_session()
 
-        session = sessions.get_session()
+    glaucoma = GlaucomaEntity(
+        timestamp=record.timestamp,
+        width=record.width,
+        height=record.height,
+        status=record.status,
+        verify=record.verify,
+        cdr_value=record.cdr_value,
+        rdar_value=record.rdar_value,
+    )
 
-        session.add(glaucoma)
-        session.commit()
-    except Exception as Exc:
-        print("Error: " + str(Exc))
+    session.add(glaucoma)
+    session.commit()
+    # except Exception as Exc:
+    #     print("Error: " + str(Exc))
 
 
 @router.get(

@@ -113,7 +113,7 @@ class GlaucomaDetectionApp(QMainWindow):
         self.glaucoma_processing_result = GlaucomaPydantic()
 
         self.diagnosis_label = QLabel(
-            f"Идентификатор изображения: {self.image_id}",
+            f"Идентификатор изображения: {self.image_id}\n"
             f"Признаки глаукомы: {self.image_class_value}{self.image_class_confidence}\n"
             f"Значение CDR: - {self.cdr_value}\n"
             f"Значение RDAR: - {self.rdar_value}\n"
@@ -220,7 +220,7 @@ class GlaucomaDetectionApp(QMainWindow):
         )
         if image_path:
             self.image_path.setText(image_path)
-            self.image_path = image_path
+            self.image_path_str = image_path
             pixmap = QPixmap(image_path)
             self.image_label.setPixmap(pixmap.scaled(self.image_label.size()))
             image_array = cv2.imread(image_path)
@@ -236,7 +236,7 @@ class GlaucomaDetectionApp(QMainWindow):
             self.timestamp = str(datetime.datetime.now())
             response = requests.post(
                 "http://localhost:8000/inference",
-                files={"image": open(self.image_path, "rb")},
+                files={"image": open(self.image_path_str, "rb")},
             )
         except TypeError:
             QMessageBox(
@@ -260,6 +260,10 @@ class GlaucomaDetectionApp(QMainWindow):
         self.image_class_confidence = response_object.predicted_class_confidence
         self.cdr_value = response_object.cdr_value
         self.rdar_value = response_object.rdar_value
+        self.verificate_diagnosis = "нет"
+        self.verificate_diagnosis_for_pydantic = (
+            False if self.verificate_diagnosis.lower() == "нет" else True
+        )
 
         if self.image_id == "":
             self.image_id = 0
@@ -267,20 +271,22 @@ class GlaucomaDetectionApp(QMainWindow):
             self.image_id += 1
 
         self.diagnosis_label.setText(
-            f"Идектификатор изображения: {self.image_id}",
+            f"Идектификатор изображения: {self.image_id}\n"
             f"Признаки глаукомы: {self.image_class_value} с вероятностью {round(self.image_class_confidence, 3) * 100}%\n"
             f"Значение CDR: {self.cdr_value}\n"
             f"Значение RDAR: {self.rdar_value}\n"
-            f"Диагноз верифицирован: - {self.verificate_diagnosis}",
+            f"Диагноз верифицирован: {self.verificate_diagnosis}",
         )
 
         self.glaucoma_processing_result.id = self.image_id
         self.glaucoma_processing_result.timestamp = self.timestamp
         self.glaucoma_processing_result.width = self.image_width
         self.glaucoma_processing_result.height = self.image_height
-        self.glaucoma_processing_result.verify = self.verificate_diagnosis
+        self.glaucoma_processing_result.verify = self.verificate_diagnosis_for_pydantic
         self.glaucoma_processing_result.cdr_value = self.cdr_value
         self.glaucoma_processing_result.rdar_value = self.rdar_value
+
+        self.add_data_to_database()
 
         # Обновление таблицы
         # row_position = self.event_table.rowCount()
@@ -304,14 +310,15 @@ class GlaucomaDetectionApp(QMainWindow):
 
     def add_data_to_database(self):
         try:
+            print(self.glaucoma_processing_result)
             response = requests.post(
                 "http://localhost:8080/database",
-                data=self.glaucoma_processing_result.model_dump_json(),
+                data=dict(self.glaucoma_processing_result.model_dump()),
             )
         except Exception as ex:
             print(ex)
 
-    def update_data_ro_database(self):
+    def update_data_to_database(self):
         pass
 
 

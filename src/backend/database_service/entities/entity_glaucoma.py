@@ -11,8 +11,8 @@ class GlaucomaEntity(Base):
     """
 
     __tablename__ = "glaucoma"
-    id = Column(Integer, primary_key=True)
-    timestamps = Column(String)
+    id = Column(Integer, primary_key=True, index=True)
+    timestamp = Column(String)
     width = Column(Integer)
     height = Column(Integer)
     status = Column(Boolean)
