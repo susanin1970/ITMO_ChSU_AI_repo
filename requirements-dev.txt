@@ -1,5 +1,6 @@
 httpx==0.28.1
 fastapi==0.115.6
+mypy==1.14.1
 onnx==1.17.0
 onnxruntime-gpu==1.17.0
 opencv-python==4.8.1.78
