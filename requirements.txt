@@ -1,7 +1,9 @@
 fastapi==0.115.6
+numpy==1.26.4
 onnx==1.17.0
 onnxruntime-gpu==1.17.0
 opencv-python==4.8.1.78
+Pillow==9.5.0
 pydantic==2.10.4
 python-multipart==0.0.20
 pyqt6==6.8.0
