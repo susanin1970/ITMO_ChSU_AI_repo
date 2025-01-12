@@ -1,7 +1,9 @@
 # python
+import datetime
 import sys
 
 # 3rdparty
+import cv2
 import requests
 from pydantic import TypeAdapter
 from PyQt6.QtCore import Qt
@@ -24,6 +26,9 @@ from PyQt6.QtWidgets import (
 # project
 from src.backend.neuralnets_serivce.schemas.service_output import (
     NeuralNetsServiceOutput,
+)
+from src.backend.database_service.schemas.database_service_schemas import (
+    GlaucomaPydantic,
 )
 
 
@@ -99,12 +104,20 @@ class GlaucomaDetectionApp(QMainWindow):
         self.cdr_value = ""
         self.rdar_value = ""
         self.verificate_diagnosis = ""
+        self.image_id = ""
+
+        self.image_width = 0
+        self.image_height = 0
+        self.timestamp = ""
+
+        self.glaucoma_processing_result = GlaucomaPydantic()
 
         self.diagnosis_label = QLabel(
+            f"Идентификатор изображения: {self.image_id}",
             f"Признаки глаукомы: {self.image_class_value}{self.image_class_confidence}\n"
             f"Значение CDR: - {self.cdr_value}\n"
             f"Значение RDAR: - {self.rdar_value}\n"
-            f"Диагноз верифицирован: - {self.verificate_diagnosis}"
+            f"Диагноз верифицирован: - {self.verificate_diagnosis}",
         )
         self.diagnosis_label.setStyleSheet("border: 1px solid black; padding: 5px;")
         self.diagnosis_label.setFixedHeight(120)
@@ -210,13 +223,17 @@ class GlaucomaDetectionApp(QMainWindow):
             self.image_path = image_path
             pixmap = QPixmap(image_path)
             self.image_label.setPixmap(pixmap.scaled(self.image_label.size()))
+            image_array = cv2.imread(image_path)
+            image_height, image_width, _ = image_array.shape
+            self.image_width = image_width
+            self.image_height = image_height
 
     def process_image(self):
         if not self.image_path:
             return
 
-        # Заглушка обработки
         try:
+            self.timestamp = str(datetime.datetime.now())
             response = requests.post(
                 "http://localhost:8000/inference",
                 files={"image": open(self.image_path, "rb")},
@@ -244,12 +261,26 @@ class GlaucomaDetectionApp(QMainWindow):
         self.cdr_value = response_object.cdr_value
         self.rdar_value = response_object.rdar_value
 
+        if self.image_id == "":
+            self.image_id = 0
+        else:
+            self.image_id += 1
+
         self.diagnosis_label.setText(
+            f"Идектификатор изображения: {self.image_id}",
             f"Признаки глаукомы: {self.image_class_value} с вероятностью {round(self.image_class_confidence, 3) * 100}%\n"
             f"Значение CDR: {self.cdr_value}\n"
             f"Значение RDAR: {self.rdar_value}\n"
-            f"Диагноз верифицирован: - {self.verificate_diagnosis}"
+            f"Диагноз верифицирован: - {self.verificate_diagnosis}",
         )
+
+        self.glaucoma_processing_result.id = self.image_id
+        self.glaucoma_processing_result.timestamp = self.timestamp
+        self.glaucoma_processing_result.width = self.image_width
+        self.glaucoma_processing_result.height = self.image_height
+        self.glaucoma_processing_result.verify = self.verificate_diagnosis
+        self.glaucoma_processing_result.cdr_value = self.cdr_value
+        self.glaucoma_processing_result.rdar_value = self.rdar_value
 
         # Обновление таблицы
         # row_position = self.event_table.rowCount()
@@ -271,8 +302,14 @@ class GlaucomaDetectionApp(QMainWindow):
     def fetch_data_from_database(self):
         pass
 
-    def send_data_to_database(self):
-        pass
+    def add_data_to_database(self):
+        try:
+            response = requests.post(
+                "http://localhost:8080/database",
+                data=self.glaucoma_processing_result.model_dump_json(),
+            )
+        except Exception as ex:
+            print(ex)
 
     def update_data_ro_database(self):
         pass

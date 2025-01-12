@@ -9,7 +9,7 @@ from src.backend.neuralnets_serivce.schemas.service_output import HealthCheck
 from src.backend.neuralnets_serivce.tools.logging_tools import get_logger
 
 from src.backend.database_service.database.database_core import database_sqllite
-from src.backend.database_service.entities.entity_glaucoma import Glaucoma
+from src.backend.database_service.entities.entity_glaucoma import GlaucomaEntity
 from src.backend.database_service.schemas.database_service_schemas import (
     GlaucomaPydantic,
 )
@@ -26,7 +26,7 @@ def update_processing_result_data_to_bd(imageId: int):
 
     query = ""
     if imageId != None:
-        query = session.query(Glaucoma).filter(Glaucoma.id == imageId)
+        query = session.query(GlaucomaEntity).filter(GlaucomaEntity.id == imageId)
 
     for data in query:
         data.verify = True
@@ -42,7 +42,7 @@ def fetch_processing_result_data_from_db_by_id(imageId: int) -> GlaucomaPydantic
 
     query = ""
     if imageId != None:
-        query = session.query(Glaucoma).filter(Glaucoma.id == imageId)
+        query = session.query(GlaucomaEntity).filter(GlaucomaEntity.id == imageId)
 
     for data in query:
         return data
@@ -55,30 +55,36 @@ def fetch_processing_result_data_from_db(filter: FilterData) -> list:
     query = ""
 
     if filter.imageId != None:
-        query = session.query(Glaucoma).filter(Glaucoma.id == filter.imageId)
+        query = session.query(GlaucomaEntity).filter(
+            GlaucomaEntity.id == filter.imageId
+        )
     if filter.timestamps != None:
-        query = session.query(Glaucoma).filter(Glaucoma.timestamps == filter.timestamps)
+        query = session.query(GlaucomaEntity).filter(
+            GlaucomaEntity.timestamps == filter.timestamps
+        )
     if filter.interval_width_min != None:
-        query = session.query(Glaucoma).filter(
-            Glaucoma.width >= filter.interval_width_min
+        query = session.query(GlaucomaEntity).filter(
+            GlaucomaEntity.width >= filter.interval_width_min
         )
     if filter.interval_height_min != None:
-        query = session.query(Glaucoma).filter(
-            Glaucoma.width >= filter.interval_height_min
+        query = session.query(GlaucomaEntity).filter(
+            GlaucomaEntity.width >= filter.interval_height_min
         )
     if filter.interval_width_max != None:
-        query = session.query(Glaucoma).filter(
-            Glaucoma.width <= filter.interval_width_max
+        query = session.query(GlaucomaEntity).filter(
+            GlaucomaEntity.width <= filter.interval_width_max
         )
     if filter.interval_height_max != None:
-        query = session.query(Glaucoma).filter(
-            Glaucoma.width <= filter.interval_height_max
+        query = session.query(GlaucomaEntity).filter(
+            GlaucomaEntity.width <= filter.interval_height_max
         )
     if filter.glaucomStatus != None:
-        query = session.query(Glaucoma).filter(Glaucoma.status == filter.glaucomStatus)
+        query = session.query(GlaucomaEntity).filter(
+            GlaucomaEntity.status == filter.glaucomStatus
+        )
     if filter.hasVerifiication != None:
-        query = session.query(Glaucoma).filter(
-            Glaucoma.verify == filter.hasVerifiication
+        query = session.query(GlaucomaEntity).filter(
+            GlaucomaEntity.verify == filter.hasVerifiication
         )
 
     list = []
@@ -93,7 +99,7 @@ def delete_processing_result_data_from_db(imageId: int):
 
     query = ""
     if imageId != None:
-        query = session.query(Glaucoma).filter(Glaucoma.id == imageId)
+        query = session.query(GlaucomaEntity).filter(GlaucomaEntity.id == imageId)
         session.delete(query)
 
     session.commit()
@@ -102,7 +108,7 @@ def delete_processing_result_data_from_db(imageId: int):
 @router.post("/database/")
 def add_processing_result_data_to_db(record: GlaucomaPydantic):
     try:
-        glaucoma = Glaucoma(
+        glaucoma = GlaucomaEntity(
             timestamp=record.timestamp,
             width=record.width,
             height=record.height,
