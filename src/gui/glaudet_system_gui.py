@@ -1,5 +1,6 @@
 # python
 import datetime
+import os
 import sys
 
 # 3rdparty
@@ -104,7 +105,6 @@ class GlaucomaDetectionApp(QMainWindow):
 
         self.main_layout.addLayout(self.image_section)
 
-        # Right: Info Section
         self.info_section = QVBoxLayout()
         self.info_section.setSpacing(10)
 
@@ -114,6 +114,7 @@ class GlaucomaDetectionApp(QMainWindow):
         self.rdar_value = ""
         self.verificate_diagnosis = ""
         self.image_id = ""
+        self.last_directory = ".\\"
 
         self.image_width = 0
         self.image_height = 0
@@ -227,9 +228,13 @@ class GlaucomaDetectionApp(QMainWindow):
     def open_image(self):
         file_dialog = QFileDialog()
         image_path, _ = file_dialog.getOpenFileName(
-            self, "Выберите изображение", "", "Images (*.png *.xpm *.jpg)"
+            self,
+            "Выберите изображение",
+            self.last_directory,
+            "Images (*.png *.xpm *.jpg)",
         )
         if image_path:
+            self.last_directory = os.path.dirname(image_path)
             self.image_path.setText(image_path)
             self.image_path_str = image_path
             pixmap = QPixmap(image_path)
