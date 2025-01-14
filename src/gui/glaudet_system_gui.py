@@ -35,10 +35,13 @@ from src.backend.database_service.schemas.database_service_schemas import (
 )
 
 
-class CenterDelegate(QStyledItemDelegate):
+class TableCellDelegate(QStyledItemDelegate):
     def initStyleOption(self, option, index):
         super().initStyleOption(option, index)
         option.displayAlignment = Qt.AlignmentFlag.AlignCenter
+
+    def createEditor(self, parent, option, index):
+        return None
 
 
 class GlaucomaDetectionApp(QMainWindow):
@@ -185,8 +188,8 @@ class GlaucomaDetectionApp(QMainWindow):
         self.log_table.horizontalHeader().setStretchLastSection(True)
         self.log_table.horizontalHeader().setDefaultSectionSize(170)
         self.log_table.setStyleSheet("border: 1px solid black;")
-        self.center_delegate = CenterDelegate()
-        self.log_table.setItemDelegate(self.center_delegate)
+        self.delegate = TableCellDelegate()
+        self.log_table.setItemDelegate(self.delegate)
         self.log_layout.addWidget(self.log_table)
 
         # Add button under the table
