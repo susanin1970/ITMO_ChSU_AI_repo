@@ -1,5 +1,6 @@
 # python
 from datetime import datetime
+from typing import List
 
 # 3rdparty
 from fastapi import APIRouter, status
@@ -46,6 +47,32 @@ def fetch_processing_result_data_from_db_by_id(imageId: int) -> GlaucomaPydantic
 
     for data in query:
         return data
+
+
+@router.post(
+    "/database/fetch_all",
+    response_model=list,
+    status_code=status.HTTP_200_OK,
+)
+def fetch_all_processing_results_data_from_db() -> list:
+    session = sessions.get_session()
+    query = session.query(GlaucomaEntity)
+    all_processing_results = query.all()
+    all_processing_results_list = []
+    for result in all_processing_results:
+        all_processing_results_list.append(
+            GlaucomaPydantic(
+                id=result.id,
+                timestamp=result.timestamp,
+                width=result.width,
+                height=result.height,
+                status=result.status,
+                verify=result.verify,
+                cdr_value=result.cdr_value,
+                rdar_value=result.rdar_value,
+            )
+        )
+    return all_processing_results_list
 
 
 @router.post("/database/filter", response_model=list, status_code=status.HTTP_200_OK)

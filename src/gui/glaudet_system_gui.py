@@ -17,7 +17,9 @@ from PyQt6.QtWidgets import (
     QMainWindow,
     QMessageBox,
     QPushButton,
+    QStyledItemDelegate,
     QTableWidget,
+    QTableWidgetItem,
     QTabWidget,
     QVBoxLayout,
     QWidget,
@@ -30,6 +32,12 @@ from src.backend.neuralnets_serivce.schemas.service_output import (
 from src.backend.database_service.schemas.database_service_schemas import (
     GlaucomaPydantic,
 )
+
+
+class CenterDelegate(QStyledItemDelegate):
+    def initStyleOption(self, option, index):
+        super().initStyleOption(option, index)
+        option.displayAlignment = Qt.AlignmentFlag.AlignCenter
 
 
 class GlaucomaDetectionApp(QMainWindow):
@@ -47,6 +55,7 @@ class GlaucomaDetectionApp(QMainWindow):
         self.initUI()
 
         self.neuralnets_service_type_adapter = TypeAdapter(NeuralNetsServiceOutput)
+        self.glaucoma_pydantic_type_adapter = TypeAdapter(GlaucomaPydantic)
 
     def initUI(self):
         # Tabs
@@ -175,11 +184,13 @@ class GlaucomaDetectionApp(QMainWindow):
         self.log_table.horizontalHeader().setStretchLastSection(True)
         self.log_table.horizontalHeader().setDefaultSectionSize(170)
         self.log_table.setStyleSheet("border: 1px solid black;")
+        self.center_delegate = CenterDelegate()
+        self.log_table.setItemDelegate(self.center_delegate)
         self.log_layout.addWidget(self.log_table)
 
         # Add button under the table
         self.get_data_button = QPushButton("Получить данные из базы")
-        self.get_data_button.clicked.connect(self.fetch_data_from_database)
+        self.get_data_button.clicked.connect(self.fetch_all_data_from_database)
         self.log_layout.addWidget(self.get_data_button)
 
         self.log_tab.setLayout(self.log_layout)
@@ -288,31 +299,83 @@ class GlaucomaDetectionApp(QMainWindow):
 
         self.add_data_to_database()
 
-        # Обновление таблицы
-        # row_position = self.event_table.rowCount()
-        # self.event_table.insertRow(row_position)
-
-        # self.event_table.setItem(row_position, 0, QTableWidgetItem(timestamp))
-        # self.event_table.setItem(row_position, 1, QTableWidgetItem(str(height)))
-        # self.event_table.setItem(row_position, 2, QTableWidgetItem(str(width)))
-        # self.event_table.setItem(row_position, 3, QTableWidgetItem(diagnosis))
-        # self.event_table.setItem(row_position, 4, QTableWidgetItem(str(is_verified)))
-        # self.event_table.setItem(row_position, 5, QTableWidgetItem(f"{cdr} / {rdar}"))
-
     def verify_results(self):
         pass  # Заглушка для верификации
 
     def show_important_image_fields(self):
         pass  # Заглушка для отображения областей изображения
 
-    def fetch_data_from_database(self):
-        pass
+    def fetch_all_data_from_database(self):
+        try:
+            response = requests.post("http://localhost:8080/database/fetch_all")
+            print(
+                f"Статус-код от энндпойнта сервиса базы данных по извлечению всех данных из базы: {response.status_code}"
+            )
+            all_fetched_data_from_db = response.json()
+            for item in all_fetched_data_from_db:
+                item_python = self.glaucoma_pydantic_type_adapter.validate_python(item)
+                row_position = self.log_table.rowCount()
+                self.log_table.insertRow(row_position)
+                self.log_table.setItem(
+                    row_position,
+                    0,
+                    QTableWidgetItem(str(item_python.id)),
+                )
+                self.log_table.setItem(
+                    row_position,
+                    1,
+                    QTableWidgetItem(str(item_python.timestamp)),
+                )
+                self.log_table.setItem(
+                    row_position,
+                    2,
+                    QTableWidgetItem(str(item_python.width)),
+                )
+                self.log_table.setItem(
+                    row_position,
+                    3,
+                    QTableWidgetItem(str(item_python.height)),
+                )
+                self.log_table.setItem(
+                    row_position,
+                    4,
+                    QTableWidgetItem(
+                        "признаки глаукомы присутствуют"
+                        if item_python.status is True
+                        else "признаки глаукомы отсутствуют"
+                    ),
+                )
+                self.log_table.setItem(
+                    row_position,
+                    5,
+                    QTableWidgetItem(
+                        "верифицирован"
+                        if item_python.verify is True
+                        else "не верифицирован"
+                    ),
+                )
+                self.log_table.setItem(
+                    row_position,
+                    6,
+                    QTableWidgetItem(str(item_python.cdr_value)),
+                )
+                self.log_table.setItem(
+                    row_position,
+                    7,
+                    QTableWidgetItem(str(item_python.rdar_value)),
+                )
+
+        except Exception as ex:
+            print(ex)
 
     def add_data_to_database(self):
         try:
             response = requests.post(
                 "http://localhost:8080/database",
                 json=self.glaucoma_processing_result.model_dump(),
+            )
+            print(
+                f"Статус-код от эндпойнта сервиса базы данных по добавлению данных в базу: {response.status_code}"
             )
 
         except Exception as ex:
