@@ -310,11 +310,11 @@ class GlaucomaDetectionApp(QMainWindow):
 
     def add_data_to_database(self):
         try:
-            print(self.glaucoma_processing_result)
             response = requests.post(
                 "http://localhost:8080/database",
-                data=dict(self.glaucoma_processing_result.model_dump()),
+                json=self.glaucoma_processing_result.model_dump(),
             )
+
         except Exception as ex:
             print(ex)
 

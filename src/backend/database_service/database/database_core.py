@@ -3,9 +3,7 @@ import logging
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.orm import sessionmaker
 
-from src.backend.database_service.entities.entity_glaucoma import (
-    Base,
-)  # Явно импортируем GlaucomaEntity
+from src.backend.database_service.entities.entity_glaucoma import Base
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
