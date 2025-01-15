@@ -2,6 +2,7 @@
 import datetime
 import os
 import sys
+from collections import Counter
 
 # 3rdparty
 import cv2
@@ -320,8 +321,36 @@ class GlaucomaDetectionApp(QMainWindow):
                 f"Статус-код от энндпойнта сервиса базы данных по извлечению всех данных из базы: {response.status_code}"
             )
             all_fetched_data_from_db = response.json()
+            rows_count = self.log_table.rowCount()
+            columns_count = self.log_table.columnCount()
+
+            table_data = []
+            for row_id in range(rows_count):
+                row_data = []
+                for column_id in range(columns_count):
+                    item = self.log_table.item(row_id, column_id).text()
+                    if item in ["признаки глаукомы отсутствуют", "не верифицирован"]:
+                        item = False
+                    if item in ["признаки глаукомы присутствуют", "верифицирован"]:
+                        item = True
+                    row_data.append(item)
+                table_data.append(row_data)
+
             for item in all_fetched_data_from_db:
                 item_python = self.glaucoma_pydantic_type_adapter.validate_python(item)
+                item_python_list = list(dict(item_python).values())
+                item_python_list = [
+                    (
+                        str(item)
+                        if (not isinstance(item, str) and not isinstance(item, bool))
+                        else item
+                    )
+                    for item in item_python_list
+                ]
+
+                if item_python_list in table_data:
+                    continue
+
                 row_position = self.log_table.rowCount()
                 self.log_table.insertRow(row_position)
                 self.log_table.setItem(
