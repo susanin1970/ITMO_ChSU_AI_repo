@@ -34,15 +34,7 @@ from src.backend.neuralnets_serivce.schemas.service_output import (
 from src.backend.database_service.schemas.database_service_schemas import (
     GlaucomaPydantic,
 )
-
-
-class TableCellDelegate(QStyledItemDelegate):
-    def initStyleOption(self, option, index):
-        super().initStyleOption(option, index)
-        option.displayAlignment = Qt.AlignmentFlag.AlignCenter
-
-    def createEditor(self, parent, option, index):
-        return None
+from src.gui.tools.qt_delegates import TableCellDelegate
 
 
 class GlaucomaDetectionApp(QMainWindow):
