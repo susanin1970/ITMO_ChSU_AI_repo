@@ -2,14 +2,12 @@
 import datetime
 import os
 import sys
-from collections import Counter
 
 # 3rdparty
 import cv2
 import requests
 from pydantic import TypeAdapter
-from PyQt6 import QtCore
-from PyQt6.QtCore import Qt, QThread
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import (
     QApplication,
@@ -20,7 +18,6 @@ from PyQt6.QtWidgets import (
     QMainWindow,
     QMessageBox,
     QPushButton,
-    QStyledItemDelegate,
     QTableWidget,
     QTableWidgetItem,
     QTabWidget,
@@ -29,41 +26,14 @@ from PyQt6.QtWidgets import (
 )
 
 # project
-from src.backend.neuralnets_serivce.schemas.service_output import (
-    NeuralNetsServiceOutput,
-)
 from src.backend.database_service.schemas.database_service_schemas import (
     GlaucomaPydantic,
 )
+from src.backend.neuralnets_serivce.schemas.service_output import (
+    NeuralNetsServiceOutput,
+)
 from src.gui.tools.qt_delegates import TableCellDelegate
-
-
-class ProcessingImageThread(QThread):
-    processing_image_signal = QtCore.pyqtSignal(requests.Response)
-
-    def __init__(self, path_to_image: str, parent=None):
-        QtCore.QThread.__init__(self, parent)
-        self.path_to_image = path_to_image
-
-    def run(self):
-        if not self.path_to_image:
-            return
-
-        try:
-            response = requests.post(
-                "http://localhost:8000/inference",
-                files={"image": open(self.path_to_image, "rb")},
-            )
-        except TypeError:
-            QMessageBox(
-                QMessageBox.Icon.Critical,
-                "Ошибка",
-                "Загрузите изображение для обработки!",
-                QMessageBox.StandardButton.Ok,
-            ).exec()
-            return
-
-        self.processing_image_signal.emit(response)
+from src.gui.tools.qt_threads import ProcessingImageThread
 
 
 class GlaucomaDetectionApp(QMainWindow):
