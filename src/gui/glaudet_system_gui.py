@@ -8,7 +8,8 @@ from collections import Counter
 import cv2
 import requests
 from pydantic import TypeAdapter
-from PyQt6.QtCore import Qt
+from PyQt6 import QtCore
+from PyQt6.QtCore import Qt, QThread
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import (
     QApplication,
@@ -37,6 +38,34 @@ from src.backend.database_service.schemas.database_service_schemas import (
 from src.gui.tools.qt_delegates import TableCellDelegate
 
 
+class ProcessingImageThread(QThread):
+    processing_image_signal = QtCore.pyqtSignal(requests.Response)
+
+    def __init__(self, path_to_image: str, parent=None):
+        QtCore.QThread.__init__(self, parent)
+        self.path_to_image = path_to_image
+
+    def run(self):
+        if not self.path_to_image:
+            return
+
+        try:
+            response = requests.post(
+                "http://localhost:8000/inference",
+                files={"image": open(self.path_to_image, "rb")},
+            )
+        except TypeError:
+            QMessageBox(
+                QMessageBox.Icon.Critical,
+                "Ошибка",
+                "Загрузите изображение для обработки!",
+                QMessageBox.StandardButton.Ok,
+            ).exec()
+            return
+
+        self.processing_image_signal.emit(response)
+
+
 class GlaucomaDetectionApp(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -49,6 +78,7 @@ class GlaucomaDetectionApp(QMainWindow):
 
         self.image_path = None
         self.processing_results = None  # Путь к выбранному изображению
+        self.process_image_thread = None
         self.initUI()
 
         self.neuralnets_service_type_adapter = TypeAdapter(NeuralNetsServiceOutput)
@@ -241,26 +271,31 @@ class GlaucomaDetectionApp(QMainWindow):
             self.image_height = image_height
 
     def process_image(self):
-        if not self.image_path:
-            return
-
-        try:
-            self.timestamp = str(datetime.datetime.now())
-            response = requests.post(
-                "http://localhost:8000/inference",
-                files={"image": open(self.image_path_str, "rb")},
-            )
-        except TypeError:
+        if (
+            self.process_image_thread is not None
+            and self.process_image_thread.isRunning()
+        ):
             QMessageBox(
-                QMessageBox.Icon.Critical,
-                "Ошибка",
-                "Загрузите изображение для обработки!",
+                QMessageBox.Icon.Information,
+                "Информация",
+                "Обработка изображения уже запущена.",
                 QMessageBox.StandardButton.Ok,
             ).exec()
             return
 
+        self.process_image_thread = ProcessingImageThread(self.image_path_str)
+        self.process_image_thread.processing_image_signal.connect(
+            self.finish_process_image_thread, Qt.ConnectionType.QueuedConnection
+        )
+        self.process_image_thread.finished.connect(
+            self.on_finished_process_image_thread
+        )
+        self.timestamp = str(datetime.datetime.now())
+        self.process_image_thread.start()
+
+    def finish_process_image_thread(self, result):
         response_object = self.neuralnets_service_type_adapter.validate_python(
-            response.json()
+            result.json()
         )
 
         self.image_class_value = (
@@ -299,6 +334,10 @@ class GlaucomaDetectionApp(QMainWindow):
         self.glaucoma_processing_result.rdar_value = self.rdar_value
 
         self.add_data_to_database()
+
+    def on_finished_process_image_thread(self):
+        self.process_image_thread.deleteLater()
+        self.process_image_thread = None
 
     def verify_results(self):
         pass  # Заглушка для верификации
