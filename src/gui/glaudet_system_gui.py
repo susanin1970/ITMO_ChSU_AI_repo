@@ -313,7 +313,7 @@ class GlaucomaDetectionApp(QMainWindow):
     def verify_diagnosis(self):
         # pass  # Заглушка для верификации
         try:
-            response = requests.put("http://localhost:8080/verify_diagnosis")
+            response = requests.put("http://localhost:8080/database/verify_diagnosis")
             print(
                 f"Статус-код от эндпойнта сервиса базы данных по верификации диагноза: {response.status_code}"
             )
@@ -340,7 +340,7 @@ class GlaucomaDetectionApp(QMainWindow):
 
     def fetch_all_data_from_database(self):
         try:
-            response = requests.post("http://localhost:8080/database/fetch_all")
+            response = requests.post("http://localhost:8080/database/fetch_all_data")
             print(
                 f"Статус-код от энндпойнта сервиса базы данных по извлечению всех данных из базы: {response.status_code}"
             )
@@ -432,7 +432,7 @@ class GlaucomaDetectionApp(QMainWindow):
     def add_data_to_database(self):
         try:
             response = requests.post(
-                "http://localhost:8080/database",
+                "http://localhost:8080/database/add_data",
                 json=self.glaucoma_processing_result.model_dump(),
             )
             print(

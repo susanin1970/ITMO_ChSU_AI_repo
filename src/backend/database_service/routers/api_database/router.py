@@ -21,7 +21,7 @@ router = APIRouter(tags=["Info"])
 sessions = GlaucomaSQLiteDatabase()
 
 
-@router.put("/database")
+@router.put("/database/update_data")
 def update_processing_result_data_to_bd(imageId: int):
     session = sessions.get_session()
 
@@ -36,7 +36,9 @@ def update_processing_result_data_to_bd(imageId: int):
 
 
 @router.get(
-    "/database", response_model=GlaucomaPydantic, status_code=status.HTTP_200_OK
+    "/database/fetch_data_by_id",
+    response_model=GlaucomaPydantic,
+    status_code=status.HTTP_200_OK,
 )
 def fetch_processing_result_data_from_db_by_id(imageId: int) -> GlaucomaPydantic:
     session = sessions.get_session()
@@ -50,32 +52,41 @@ def fetch_processing_result_data_from_db_by_id(imageId: int) -> GlaucomaPydantic
 
 
 @router.post(
-    "/database/fetch_all",
+    "/database/fetch_all_data",
+    summary="Чтение всех данных из базы",
+    description="Читает все данные из базы",
+    response_description="HTTP Status Code 200",
     response_model=list,
     status_code=status.HTTP_200_OK,
 )
 def fetch_all_processing_results_data_from_db() -> list:
-    session = sessions.get_session()
-    query = session.query(GlaucomaEntity)
-    all_processing_results = query.all()
-    all_processing_results_list = []
-    for result in all_processing_results:
-        all_processing_results_list.append(
-            GlaucomaPydantic(
-                id=result.id,
-                timestamp=result.timestamp,
-                width=result.width,
-                height=result.height,
-                status=result.status,
-                verify=result.verify,
-                cdr_value=result.cdr_value,
-                rdar_value=result.rdar_value,
+    try:
+        session = sessions.get_session()
+        query = session.query(GlaucomaEntity)
+        all_processing_results = query.all()
+        all_processing_results_list = []
+        for result in all_processing_results:
+            all_processing_results_list.append(
+                GlaucomaPydantic(
+                    id=result.id,
+                    timestamp=result.timestamp,
+                    width=result.width,
+                    height=result.height,
+                    status=result.status,
+                    verify=result.verify,
+                    cdr_value=result.cdr_value,
+                    rdar_value=result.rdar_value,
+                )
             )
-        )
-    return all_processing_results_list
+        return all_processing_results_list
+    except Exception as ex:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
 
 
-@router.post("/database/filter", response_model=list, status_code=status.HTTP_200_OK)
+@router.post(
+    "/database/filter_data", response_model=list, status_code=status.HTTP_200_OK
+)
 def fetch_processing_result_data_from_db(filter: FilterData) -> list:
     session = sessions.get_session()
 
@@ -120,7 +131,7 @@ def fetch_processing_result_data_from_db(filter: FilterData) -> list:
     return list
 
 
-@router.delete("/database/delete")
+@router.delete("/database/delete_data")
 def delete_processing_result_data_from_db(imageId: int):
     session = sessions.get_session()
 
@@ -132,28 +143,42 @@ def delete_processing_result_data_from_db(imageId: int):
     session.commit()
 
 
-@router.post("/database")
+@router.post(
+    "/database/add_data",
+    summary="Добавление данных в базу",
+    description="Добавляет данные в базу",
+    response_description="HTTP Status Code 200",
+    status_code=status.HTTP_200_OK,
+)
 def add_processing_result_data_to_db(record: GlaucomaPydantic) -> None:
-    # try:
-    session = sessions.get_session()
+    try:
+        session = sessions.get_session()
 
-    glaucoma = GlaucomaEntity(
-        timestamp=record.timestamp,
-        width=record.width,
-        height=record.height,
-        status=record.status,
-        verify=record.verify,
-        cdr_value=record.cdr_value,
-        rdar_value=record.rdar_value,
-    )
+        glaucoma = GlaucomaEntity(
+            timestamp=record.timestamp,
+            width=record.width,
+            height=record.height,
+            status=record.status,
+            verify=record.verify,
+            cdr_value=record.cdr_value,
+            rdar_value=record.rdar_value,
+        )
 
-    session.add(glaucoma)
-    session.commit()
-    # except Exception as Exc:
-    #     print("Error: " + str(Exc))
+        session.add(glaucoma)
+        session.commit()
+    except Exception as ex:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
 
 
-@router.put("/verify_diagnosis")
+@router.put(
+    "/database/verify_diagnosis",
+    summary="Выполнение верификации диагноза для последней записи из базы данных",
+    description="Выполняет верификацию диагноза для последней записи из базы данных",
+    response_description="HTTP Status Code 200",
+    response_model=GlaucomaPydantic,
+    status_code=status.HTTP_200_OK,
+)
 def verify_diagnosis() -> GlaucomaPydantic:
     try:
         session = sessions.get_session()
@@ -185,9 +210,7 @@ def verify_diagnosis() -> GlaucomaPydantic:
         )
     except Exception as ex:
         session.rollback()
-        raise HTTPException(status_code=500, detail=str(ex))
-    finally:
-        session.close()
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
 
 
 @router.get(
