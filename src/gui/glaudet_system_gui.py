@@ -150,6 +150,7 @@ class GlaucomaDetectionApp(QMainWindow):
         self.verify_button = QPushButton("Верифицировать результаты обработки")
         self.verify_button.setFixedHeight(40)
         self.info_section.addWidget(self.verify_button)
+        self.verify_button.clicked.connect(self.verify_diagnosis)
 
         self.show_areas_button = QPushButton(
             "Отобразить области изображения, ответственные за принятие решения"
@@ -309,8 +310,30 @@ class GlaucomaDetectionApp(QMainWindow):
         self.process_image_thread.deleteLater()
         self.process_image_thread = None
 
-    def verify_results(self):
-        pass  # Заглушка для верификации
+    def verify_diagnosis(self):
+        # pass  # Заглушка для верификации
+        try:
+            response = requests.put("http://localhost:8080/verify_diagnosis")
+            print(
+                f"Статус-код от эндпойнта сервиса базы данных по верификации диагноза: {response.status_code}"
+            )
+            response_object = self.glaucoma_pydantic_type_adapter.validate_python(
+                response.json()
+            )
+
+            self.verificate_diagnosis = (
+                "нет" if response_object.verify is False else "да"
+            )
+
+            self.diagnosis_label.setText(
+                f"Идектификатор изображения: {self.image_id}\n"
+                f"Признаки глаукомы: {self.image_class_value} с вероятностью {round(self.image_class_confidence, 3) * 100}%\n"
+                f"Значение CDR: {self.cdr_value}\n"
+                f"Значение RDAR: {self.rdar_value}\n"
+                f"Диагноз верифицирован: {self.verificate_diagnosis}",
+            )
+        except Exception as ex:
+            print(ex)
 
     def show_important_image_fields(self):
         pass  # Заглушка для отображения областей изображения

@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import List
 
 # 3rdparty
-from fastapi import APIRouter, status
+from fastapi import APIRouter, HTTPException, status
 
 # project
 from src.backend.neuralnets_serivce.schemas.service_output import HealthCheck
@@ -120,7 +120,7 @@ def fetch_processing_result_data_from_db(filter: FilterData) -> list:
     return list
 
 
-@router.delete("/database")
+@router.delete("/database/delete")
 def delete_processing_result_data_from_db(imageId: int):
     session = sessions.get_session()
 
@@ -133,7 +133,7 @@ def delete_processing_result_data_from_db(imageId: int):
 
 
 @router.post("/database")
-def add_processing_result_data_to_db(record: GlaucomaPydantic):
+def add_processing_result_data_to_db(record: GlaucomaPydantic) -> None:
     # try:
     session = sessions.get_session()
 
@@ -151,6 +151,43 @@ def add_processing_result_data_to_db(record: GlaucomaPydantic):
     session.commit()
     # except Exception as Exc:
     #     print("Error: " + str(Exc))
+
+
+@router.put("/verify_diagnosis")
+def verify_diagnosis() -> GlaucomaPydantic:
+    try:
+        session = sessions.get_session()
+        last_record = (
+            session.query(GlaucomaEntity)
+            .order_by(GlaucomaEntity.timestamp.desc())
+            .first()
+        )
+
+        if not last_record:
+            session.close()
+            raise HTTPException(
+                status_code=404, detail="Записей в базе данных не обнаружено"
+            )
+
+        last_record.verify = True
+
+        session.commit()
+
+        return GlaucomaPydantic(
+            id=last_record.id,
+            timestamp=last_record.timestamp,
+            width=last_record.width,
+            height=last_record.height,
+            status=last_record.status,
+            verify=last_record.verify,
+            cdr_value=last_record.cdr_value,
+            rdar_value=last_record.rdar_value,
+        )
+    except Exception as ex:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=str(ex))
+    finally:
+        session.close()
 
 
 @router.get(
