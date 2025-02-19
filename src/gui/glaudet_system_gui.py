@@ -268,16 +268,14 @@ class GlaucomaDetectionApp(QMainWindow):
         self.process_image_thread.processing_image_signal.connect(
             self.finish_process_image_thread, Qt.ConnectionType.QueuedConnection
         )
-        self.process_image_thread.error_occured.connect(
-            self.show_processing_image_error
-        )
+        self.process_image_thread.error_occured.connect(self.show_message_box)
         self.process_image_thread.finished.connect(
             self.on_finished_process_image_thread
         )
         self.timestamp = str(datetime.datetime.now())
         self.process_image_thread.start()
 
-    def show_processing_image_error(self, message: str):
+    def show_message_box(self, message: str):
         """Метод для отображения message box с ошибкой обработки изображения
 
         Параметры:
@@ -360,6 +358,10 @@ class GlaucomaDetectionApp(QMainWindow):
                 f"Значение CDR: {self.cdr_value}\n"
                 f"Значение RDAR: {self.rdar_value}\n"
                 f"Диагноз верифицирован: {self.verificate_diagnosis}",
+            )
+        except TypeError as tex:
+            self.show_message_box(
+                "Для верификации диагноза необходимо обработать изображение"
             )
         except Exception as ex:
             print(ex)
@@ -462,6 +464,9 @@ class GlaucomaDetectionApp(QMainWindow):
             print(ex)
 
     def add_data_to_database(self):
+        """
+        Метод по добавлению результатов обработки изображений в базу
+        """
         try:
             response = requests.post(
                 "http://localhost:8080/database/add_data",
