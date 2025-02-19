@@ -38,9 +38,10 @@ from src.gui.tools.qt_threads import ProcessingImageThread
 
 class GlaucomaDetectionApp(QMainWindow):
     def __init__(self):
+        """GUI системы GLAUDET для распознавания на снимках глазного дна признаков наличия глаукомы"""
         super().__init__()
 
-        self.setWindowTitle("Glaudet")
+        self.setWindowTitle("GLAUDET")
         self.setGeometry(100, 100, 1280, 720)
         self.setWindowFlags(
             self.windowFlags() & ~Qt.WindowType.WindowMaximizeButtonHint
@@ -55,6 +56,9 @@ class GlaucomaDetectionApp(QMainWindow):
         self.glaucoma_pydantic_type_adapter = TypeAdapter(GlaucomaPydantic)
 
     def initUI(self):
+        """
+        Метод для инициализации GUI
+        """
         # Tabs
         self.tabs = QTabWidget()
         self.setCentralWidget(self.tabs)
@@ -223,6 +227,9 @@ class GlaucomaDetectionApp(QMainWindow):
         self.about_tab.setLayout(self.about_layout)
 
     def open_image(self):
+        """
+        Метод для открытия изображения
+        """
         file_dialog = QFileDialog()
         image_path, _ = file_dialog.getOpenFileName(
             self,
@@ -242,6 +249,9 @@ class GlaucomaDetectionApp(QMainWindow):
             self.image_height = image_height
 
     def process_image(self):
+        """
+        Метод обработки изображения с помощью нейросетевого сервиса
+        """
         if (
             self.process_image_thread is not None
             and self.process_image_thread.isRunning()
@@ -268,6 +278,11 @@ class GlaucomaDetectionApp(QMainWindow):
         self.process_image_thread.start()
 
     def show_processing_image_error(self, message: str):
+        """Метод для отображения message box с ошибкой обработки изображения
+
+        Параметры:
+            * `message` (`str`): сообщение
+        """
         QMessageBox(
             QMessageBox.Icon.Critical,
             "Ошибка",
@@ -318,11 +333,14 @@ class GlaucomaDetectionApp(QMainWindow):
         self.add_data_to_database()
 
     def on_finished_process_image_thread(self):
+        """Метод, выполняемый по завершению треда обработки изображения"""
         self.process_image_thread.deleteLater()
         self.process_image_thread = None
 
     def verify_diagnosis(self):
-        # pass  # Заглушка для верификации
+        """
+        Метод для выполнения процедуры верификации диагноза на изображении
+        """
         try:
             response = requests.put("http://localhost:8080/database/verify_diagnosis")
             print(
@@ -350,6 +368,9 @@ class GlaucomaDetectionApp(QMainWindow):
         pass  # Заглушка для отображения областей изображения
 
     def fetch_all_data_from_database(self):
+        """
+        Метод для чтения всех данных из базы и отображения их в таблице журнала событий
+        """
         try:
             response = requests.post("http://localhost:8080/database/fetch_all_data")
             print(
