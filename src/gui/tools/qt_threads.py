@@ -1,14 +1,14 @@
 # 3rdparty
 import requests
 from PyQt6 import QtCore
-from PyQt6.QtCore import Qt, QThread
-from PyQt6.QtWidgets import QMessageBox
+from PyQt6.QtCore import QThread
 
 
 class ProcessingImageThread(QThread):
     """Поток, определяющий обработку изображения нейросетевым сервисом"""
 
     processing_image_signal = QtCore.pyqtSignal(requests.Response)
+    error_occured = QtCore.pyqtSignal(str)
 
     def __init__(self, path_to_image: str, parent=None):
         """Конструктор класса потока
@@ -31,12 +31,7 @@ class ProcessingImageThread(QThread):
                 files={"image": open(self.path_to_image, "rb")},
             )
         except TypeError:
-            QMessageBox(
-                QMessageBox.Icon.Critical,
-                "Ошибка",
-                "Загрузите изображение для обработки!",
-                QMessageBox.StandardButton.Ok,
-            ).exec()
+            self.error_occured.emit("Загрузите изображение для обработки!")
             return
 
         self.processing_image_signal.emit(response)

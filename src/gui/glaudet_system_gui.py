@@ -254,15 +254,26 @@ class GlaucomaDetectionApp(QMainWindow):
             ).exec()
             return
 
-        self.process_image_thread = ProcessingImageThread(self.image_path_str)
+        self.process_image_thread = ProcessingImageThread(self.image_path)
         self.process_image_thread.processing_image_signal.connect(
             self.finish_process_image_thread, Qt.ConnectionType.QueuedConnection
+        )
+        self.process_image_thread.error_occured.connect(
+            self.show_processing_image_error
         )
         self.process_image_thread.finished.connect(
             self.on_finished_process_image_thread
         )
         self.timestamp = str(datetime.datetime.now())
         self.process_image_thread.start()
+
+    def show_processing_image_error(self, message: str):
+        QMessageBox(
+            QMessageBox.Icon.Critical,
+            "Ошибка",
+            message,
+            QMessageBox.StandardButton.Ok,
+        ).exec()
 
     def finish_process_image_thread(self, result):
         response_object = self.neuralnets_service_type_adapter.validate_python(
