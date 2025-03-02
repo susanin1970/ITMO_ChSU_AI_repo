@@ -264,7 +264,7 @@ class GlaucomaDetectionApp(QMainWindow):
             ).exec()
             return
 
-        self.process_image_thread = ProcessingImageThread(self.image_path)
+        self.process_image_thread = ProcessingImageThread(self.image_path_str)
         self.process_image_thread.processing_image_signal.connect(
             self.finish_process_image_thread, Qt.ConnectionType.QueuedConnection
         )
