@@ -327,6 +327,9 @@ class GlaucomaDetectionApp(QMainWindow):
         self.glaucoma_processing_result.verify = self.verificate_diagnosis_for_pydantic
         self.glaucoma_processing_result.cdr_value = self.cdr_value
         self.glaucoma_processing_result.rdar_value = self.rdar_value
+        self.glaucoma_processing_result.status = (
+            False if self.image_class_value.lower() == "отсутствуют" else True
+        )
 
         self.add_data_to_database()
 
