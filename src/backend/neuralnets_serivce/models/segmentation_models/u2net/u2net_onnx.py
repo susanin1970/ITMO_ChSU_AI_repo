@@ -81,13 +81,19 @@ class U2Net_ONNX:
         optic_disc_area = np.sum(mask_for_optic_disc > 0)
         optic_cup_area = np.sum(mask_for_optic_cup > 0)
 
-        rdar_value = round(optic_cup_area / optic_disc_area, 3)
+        if optic_disc_area == 0.0:
+            rdar_value = 0.0
+        else:
+            rdar_value = round(optic_cup_area / optic_disc_area, 3)
 
         max_diameter_of_optic_disc_mask = calc_max_mask_diameter(mask_for_optic_disc)
         max_diameter_of_optic_cup_mask = calc_max_mask_diameter(mask_for_optic_cup)
 
-        cdr_value = round(
-            max_diameter_of_optic_cup_mask / max_diameter_of_optic_disc_mask, 3
-        )
+        if max_diameter_of_optic_disc_mask == 0.0:
+            cdr_value = 0.0
+        else:
+            cdr_value = round(
+                max_diameter_of_optic_cup_mask / max_diameter_of_optic_disc_mask, 3
+            )
 
         return cdr_value, rdar_value, inference_time_ms
