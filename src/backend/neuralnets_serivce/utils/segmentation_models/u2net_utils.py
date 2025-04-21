@@ -41,13 +41,17 @@ def calc_max_mask_diameter(mask_image: npt.NDArray) -> float:
     Возвращает:
         * `float`: значение максимального диаметра маски оптического диска/глазного бокала
     """
-    contours, _ = cv2.findContours(mask_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    mask_contour = contours[0]
-    points_of_mask = mask_contour.reshape(-1, 2)
-    diameters_list = pdist(points_of_mask)
-    max_diameter = np.max(diameters_list)
-
-    return max_diameter
+    try:
+        contours, _ = cv2.findContours(
+            mask_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE
+        )
+        mask_contour = contours[0]
+        points_of_mask = mask_contour.reshape(-1, 2)
+        diameters_list = pdist(points_of_mask)
+        max_diameter = np.max(diameters_list)
+        return max_diameter
+    except IndexError:
+        return 0.0
 
 
 def remap_image(
