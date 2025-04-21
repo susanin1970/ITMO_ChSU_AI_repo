@@ -58,5 +58,8 @@ class EfficientNet_ONNX:
         end_time = time.perf_counter()
         inference_time_ms = round((end_time - start_time) * 1000, 3)
         class_id = efficientnet_outputs[0].argmax()
-        confidence = efficientnet_outputs[0].max()
+
+        exp_output = np.exp(efficientnet_outputs[0] - np.max(efficientnet_outputs[0]))
+        confidence = (exp_output / np.sum(exp_output, axis=1, keepdims=True)).max()
+
         return class_id, confidence, inference_time_ms
